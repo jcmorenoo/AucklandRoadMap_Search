@@ -15,7 +15,7 @@ import java.util.Random;
  * draws some squares to the drawing area which are removed when clicked. Some
  * information is given in the text area, and pressing any of the navigation
  * buttons makes a new set of squares.
- * 
+ *
  * @author tony
  */
 public class SquaresExample extends GUI {
@@ -108,24 +108,48 @@ public class SquaresExample extends GUI {
 		new SquaresExample();
 	}
 
-	
+
 
 	@Override
 	protected void exactSearch() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void onMouseWheelAction(MouseWheelEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void onDrag(int x, int y) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	protected void setStarting() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void setGoal() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void findShortestPath() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void findFastestPath() {
+		// TODO Auto-generated method stub
+
 	}
 }
 

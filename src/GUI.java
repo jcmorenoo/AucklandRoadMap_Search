@@ -33,11 +33,11 @@ import javax.swing.text.DefaultCaret;
  * *abstract class*, which means you'll need to extend it in your own program.
  * For a simple example of how to do this, have a look at the SquaresExample
  * class.
- * 
+ *
  * This GUI uses Swing, not the first-year UI library. Swing is not the focus of
  * this course, but it would be to your benefit if you took some time to
  * understand how this class works.
- * 
+ *
  * @author tony
  */
 public abstract class GUI {
@@ -49,9 +49,9 @@ public abstract class GUI {
 	public enum Move {
 		NORTH, SOUTH, EAST, WEST, ZOOM_IN, ZOOM_OUT
 	};
-	
+
 	protected abstract void onDrag(int x, int y);
-	
+
 	protected abstract void onMouseWheelAction(MouseWheelEvent e);
 
 	// these are the methods you need to implement.
@@ -61,6 +61,26 @@ public abstract class GUI {
 	 * the actual drawing, which is done with the passed Graphics object.
 	 */
 	protected abstract void redraw(Graphics g);
+
+	/**
+	 * called when setting a starting node
+	 */
+	protected abstract void setStarting();
+
+	/**
+	 * called when setting a goal node
+	 */
+	protected abstract void setGoal();
+
+	/**
+	 * called when finding shortest path
+	 */
+	protected abstract void findShortestPath();
+
+	/**
+	 * called when finding fastest path
+	 */
+	protected abstract void findFastestPath();
 
 
 	protected abstract void exactSearch();
@@ -87,7 +107,7 @@ public abstract class GUI {
 	 * data files from. File objects representing the four files of interested
 	 * are passed to the method. The fourth File, polygons, might be null if it
 	 * isn't present in the directory.
-	 * 
+	 *
 	 * @param nodes
 	 *            a File for nodeID-lat-lon.tab
 	 * @param roads
@@ -145,7 +165,7 @@ public abstract class GUI {
 	private static final int DEFAULT_DRAWING_WIDTH = 400;
 	private static final int TEXT_OUTPUT_ROWS = 5;
 	private static final int SEARCH_COLS = 15;
-	
+
 
 	private static final String NODES_FILENAME = "nodeID-lat-lon.tab";
 	private static final String ROADS_FILENAME = "roadID-roadInfo.tab";
@@ -176,11 +196,65 @@ public abstract class GUI {
 	public GUI() {
 		initialise();
 	}
-	
-	
+
+
 
 	@SuppressWarnings("serial")
 	private void initialise() {
+
+		JButton starting = new JButton("Start");
+		starting.addActionListener(new ActionListener(){
+
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				// set a boolean and select the starting node
+				setStarting();
+
+			}
+		});
+
+		JButton goal = new JButton("Goal");
+		goal.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				// set a boolean and select the end node..
+				// search for the shortest path.
+				//
+				setGoal();
+
+			}
+
+		});
+
+		JButton shortestPath = new JButton("ShortestPath");
+		shortestPath.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				//update the current path to shortest path
+				//redraw
+				findShortestPath();
+
+			}
+
+		});
+
+		JButton fastestPath = new JButton("FastestPath");
+		fastestPath.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				findFastestPath();
+
+			}
+
+		});
 
 		/*
 		 * first, we make the buttons etc. that go along the top bar.
@@ -298,14 +372,14 @@ public abstract class GUI {
 		search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//System.out.println(e.getActionCommand());
-				
-				
+
+
 				onSearch();
-				
+
 				redraw();
 			}
-			
-			
+
+
 		});
 
 		if (UPDATE_ON_EVERY_CHARACTER) {
@@ -314,12 +388,12 @@ public abstract class GUI {
 			search.addKeyListener(new KeyAdapter() {
 				public void keyReleased(KeyEvent e) {
 					// don't fire an event on backspace or delete
-					
+
 					if (e.getKeyCode() == 8 || e.getKeyCode() == 127)
 						return;
 					else if(e.getKeyCode() == 13 || e.getKeyCode() == 10){
 						exactSearch();
-												
+
 					}
 					else{
 						search.postActionEvent();
@@ -348,6 +422,16 @@ public abstract class GUI {
 		Border edge = BorderFactory.createEmptyBorder(5, 5, 5, 5);
 		controls.setBorder(edge);
 
+		//make panel for the new additions (startingnode,goalnode,fastestpath,shortestpath)
+		JPanel routeFinder = new JPanel();
+		routeFinder.setLayout(new GridLayout(2,2));
+		routeFinder.add(starting);
+		routeFinder.add(goal);
+		routeFinder.add(shortestPath);
+		routeFinder.add(fastestPath);
+
+
+
 		JPanel loadquit = new JPanel();
 		loadquit.setLayout(new GridLayout(2, 1));
 		// manually set a fixed size for the panel containing the load and quit
@@ -356,6 +440,9 @@ public abstract class GUI {
 		loadquit.add(load);
 		loadquit.add(quit);
 		controls.add(loadquit);
+		controls.add(Box.createRigidArea(new Dimension(15, 0)));
+		//add the routeFinder in the controls
+		controls.add(routeFinder);
 		// rigid areas are invisible components that can be used to space
 		// components out.
 		controls.add(Box.createRigidArea(new Dimension(15, 0)));
@@ -397,31 +484,31 @@ public abstract class GUI {
 		drawing.setVisible(true);
 
 		drawing.addMouseListener(new MouseAdapter() {
-			
+
 			int oldX;
 			int oldY;
-			
+
 			public void mouseReleased(MouseEvent e) {
 				onDrag(oldX-e.getX(),e.getY() - oldY);
 				redraw();
-				
-				
-				
+
+
+
 			}
-			
+
 			public void mouseClicked(MouseEvent e){
 				onClick(e);
-				
+
 				redraw();
 			}
-			
+
 			public void mousePressed(MouseEvent e){
 				oldX = e.getX();
 				oldY = e.getY();
-				
+
 			}
-			
-			
+
+
 		});
 
 		drawing.addMouseWheelListener(new MouseAdapter() {
@@ -430,7 +517,7 @@ public abstract class GUI {
 //				System.out.println("Action: " + e.getScrollAmount());
 				onMouseWheelAction(e);
 				redraw();
-				
+
 			}
 		});
 
@@ -480,7 +567,7 @@ public abstract class GUI {
 	}
 
 
-	
+
 }
 
 // code for COMP261 assignments
