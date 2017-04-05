@@ -19,9 +19,16 @@ public class Node {
 	private boolean isHighlighted = false;
 	
 	
+	
+	//FOR SEARCH
+	private boolean visited;
+	
+	
 	public Node(int id, Location loc){
 		this.id = id;
 		this.location = loc;
+		this.visited = false;
+		
 	}
 	
 	public void addSegmentIn(Segment segIn){
@@ -75,6 +82,19 @@ public class Node {
 	public void unHighlight(){
 		this.isHighlighted = false;
 	}
+	
+	public boolean isVisited(){
+		return this.visited;
+	}
+	
+	public void visit(){
+		this.visited = true;
+	}
+	
+	public void unVisit(){
+		this.visited = false;
+	}
+	
 	
 	
 }

@@ -9,26 +9,37 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 public class AucklandRoadMap extends GUI {
-
+	
 	//collections
 	private Map<Integer, Road> roads = new HashMap<Integer, Road>();
 	private Set<Segment> segments = new HashSet<Segment>();
 	private Map<Integer, Node> nodes = new HashMap<Integer, Node>();
 	private ArrayList<Misc> polygons = new ArrayList<Misc>();
 	private Trie trie = null;
+	
+	private Queue<SearchNode> fringe;
+	
+	private SearchNode finalNode;
 
 	private boolean goal = false;
+	private double costFromStart;
+	private double costToGoal;
+	private double totalCost;
+	
 
 
 	private Node selectedNode = null;
@@ -68,7 +79,15 @@ public class AucklandRoadMap extends GUI {
 		this.minLon = Double.POSITIVE_INFINITY;
 		this.maxLon = Double.NEGATIVE_INFINITY;
 		this.trie = null;
+		
+		this.fringe = new PriorityQueue<SearchNode>();
 
+	}
+	
+	private Queue<Node> initialiseFringe(){
+		
+		return null;
+		
 	}
 
 
@@ -694,9 +713,30 @@ public class AucklandRoadMap extends GUI {
 	@Override
 	protected void findShortestPath() {
 		// TODO Auto-generated method stub
+		//set all nodes to not visited
+		//set all nodes pathfrom = null
+		for(Map.Entry<Integer, Node> entry : this.nodes.entrySet()){
+			Node n = entry.getValue();
+			n.unVisit();
+		}
+		this.fringe = new PriorityQueue<SearchNode>();
+		
+		
 
 	}
 
+
+	private double estimate(Node start, Node target) {
+		// TODO Auto-generated method stub
+		//euclidean??
+		
+		Location locStart = start.getLocation();
+		Location locTarget = target.getLocation();
+		
+		double distance = locStart.distance(locTarget);
+		
+		return distance;
+	}
 
 	@Override
 	protected void findFastestPath() {
