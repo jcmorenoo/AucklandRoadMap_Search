@@ -768,9 +768,7 @@ public class AucklandRoadMap extends GUI {
 						
 						findRoute(sn);
 						
-						for(Road r : this.roadsRoute){
-							System.out.println(r.getName());
-						}
+						
 						break;
 						//exit
 					}
@@ -824,7 +822,6 @@ public class AucklandRoadMap extends GUI {
 			
 		}
 		
-		//this is the start node
 		
 		
 		this.redraw();
@@ -889,9 +886,7 @@ public class AucklandRoadMap extends GUI {
 						
 						findRoute(sn);
 						
-						for(Road r : this.roadsRoute){
-							System.out.println(r.getName());
-						}
+						
 						break;
 						//exit
 					}
