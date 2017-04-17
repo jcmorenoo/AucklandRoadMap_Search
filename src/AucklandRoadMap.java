@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
@@ -31,7 +32,9 @@ public class AucklandRoadMap extends GUI {
 	private ArrayList<Misc> polygons = new ArrayList<Misc>();
 	private Trie trie = null;
 	
-	private Queue<SearchNode> fringe;
+	
+	
+	private Fringe fringe;
 	
 	private SearchNode finalNode;
 
@@ -40,11 +43,14 @@ public class AucklandRoadMap extends GUI {
 	private double costToGoal;
 	private double totalCost;
 	
-
+	
+	private int numSubtrees;
 
 	private Node selectedNode = null;
 	private Road selectedRoad = null;
 
+	private List<Segment> segsRoute;
+	private List<Road> roadsRoute;
 	private List<Segment> startingSegIn;
 	private List<Segment> startingSegOut;
 	private Set<Road> selectedRoads = null;
@@ -61,6 +67,10 @@ public class AucklandRoadMap extends GUI {
 	public static Location origin;
 	public static double WINDOW_SIZE = 400;
 	public static double scale;
+	
+	// articulation points field
+	private Set<Node> articulationPoints;
+	private boolean artPtsToggle = false;
 
 
 
@@ -79,16 +89,14 @@ public class AucklandRoadMap extends GUI {
 		this.minLon = Double.POSITIVE_INFINITY;
 		this.maxLon = Double.NEGATIVE_INFINITY;
 		this.trie = null;
+		this.segsRoute = new ArrayList<Segment>();
+		this.articulationPoints = new HashSet<Node>();
 		
-		this.fringe = new PriorityQueue<SearchNode>();
+		this.fringe = new Fringe();
 
 	}
 	
-	private Queue<Node> initialiseFringe(){
-		
-		return null;
-		
-	}
+	
 
 
 	/**
@@ -136,21 +144,43 @@ public class AucklandRoadMap extends GUI {
 		for(Map.Entry<Integer, Node> node : this.nodes.entrySet()){
 			Node n = node.getValue();
 			n.unHighlight();
-			if(n == this.selectedNode){
+			n.removeAp();
+			if(n == this.selectedNode | n == this.targetNode){
 				n.highlight();
 			}
 			n.draw(g,this.origin, this.scale);
 			//System.out.println(n.getLocation().x + " " + n.getLocation().y);
 		}
+		if(this.artPtsToggle){
+			for(Node n : this.articulationPoints){
+				n.setAp();
+				n.draw(g,  this.origin, this.scale);
+			}
+		}
 
+
+		
 		for(Segment seg : this.segments){
 			seg.unHighlight();
 			if(this.selectedSegments.contains(seg)){
 				seg.highlight();
 			}
+			
+			if(this.segsRoute.contains(seg)){
+				seg.highlightRoute();
+			}
 			seg.draw(g, this.origin, this.scale);
 		}
+		
+		for(Segment seg : this.segsRoute){
+			seg.highlightRoute();
+			seg.draw(g, this.origin, this.scale);
+		}
+		
+		
+		//System.out.println(this.segsRoute.size());
 
+		
 
 
 
@@ -189,7 +219,7 @@ public class AucklandRoadMap extends GUI {
 						this.startingSegIn.add(seg);
 					}
 					//for testing
-					this.selectedSegments.add(seg);
+					//this.selectedSegments.add(seg);
 
 				}
 				for(Segment segOut : segsOut){
@@ -201,10 +231,9 @@ public class AucklandRoadMap extends GUI {
 					}
 
 					//for testing
-					this.selectedSegments.add(segOut);
+					//this.selectedSegments.add(segOut);
 
 				}
-
 
 
 				break;
@@ -712,19 +741,98 @@ public class AucklandRoadMap extends GUI {
 
 	@Override
 	protected void findShortestPath() {
+		System.out.println("Finding shortest path");
+		this.roadsRoute = new ArrayList<Road>();
+		this.segsRoute = new ArrayList<Segment>();
 		// TODO Auto-generated method stub
 		//set all nodes to not visited
 		//set all nodes pathfrom = null
-		for(Map.Entry<Integer, Node> entry : this.nodes.entrySet()){
-			Node n = entry.getValue();
-			n.unVisit();
+		
+		if(this.targetNode != null && this.selectedNode != null){
+			for(Map.Entry<Integer, Node> entry : this.nodes.entrySet()){
+				Node n = entry.getValue();
+				n.unVisit();
+			}
+			this.fringe = new Fringe();
+			
+			this.fringe.enqueue(this.selectedNode, null, 0, estimate(this.selectedNode, this.targetNode));
+			
+			while(!this.fringe.isEmpty()){
+			
+				SearchNode sn = this.fringe.dequeue();
+		
+				Node currentNode = sn.getNode();
+				if(!currentNode.isVisited()){
+					currentNode.visit();
+					if(currentNode == this.targetNode){
+						
+						findRoute(sn);
+						
+						for(Road r : this.roadsRoute){
+							System.out.println(r.getName());
+						}
+						break;
+						//exit
+					}
+					
+					
+					for(Segment s : currentNode.getSegOut()){
+						Node neigh = null;
+						if(s.getNode1() == currentNode){
+							neigh = s.getNode2();
+						}
+						else{
+							neigh = s.getNode1();
+						}
+						if(!neigh.isVisited()){
+							
+							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + s.getLength(), s.getLength() + estimate(this.targetNode, neigh));
+						}
+					}
+				}
+			}
+			
+			
 		}
-		this.fringe = new PriorityQueue<SearchNode>();
+		
+		this.getPath();
+		
+		
 		
 		
 
 	}
 
+
+	private void findRoute(SearchNode sn) {
+		// TODO Auto-generated method stub
+		
+		Node cur = sn.getNode();
+		SearchNode from = sn.getFrom();
+		
+		
+		Segment path = sn.getPath();
+		if(path != null){
+			this.segsRoute.add(path);
+			if(!this.roadsRoute.contains(path.getRoad())){
+				this.roadsRoute.add(path.getRoad());
+			}
+			
+		}
+		if(from != null){
+			findRoute(from);
+			
+		}
+		
+		//this is the start node
+		
+		
+		this.redraw();
+
+		
+		
+		
+	}
 
 	private double estimate(Node start, Node target) {
 		// TODO Auto-generated method stub
@@ -737,11 +845,132 @@ public class AucklandRoadMap extends GUI {
 		
 		return distance;
 	}
+	
+	private double estimateFastest(Node start, Node target){
+		//use d/v
+		
+		Location locStart = start.getLocation();
+		Location locTarget = target.getLocation();
+		
+		double distance = locStart.distance(locTarget);
+		
+		return distance/100;
+	}
 
+	
+	//uses time as cost.. so less time , smaller cost
 	@Override
 	protected void findFastestPath() {
 		// TODO Auto-generated method stub
-
+		System.out.println("Finding fastest path");
+		this.roadsRoute = new ArrayList<Road>();
+		this.segsRoute = new ArrayList<Segment>();
+		// TODO Auto-generated method stub
+		//set all nodes to not visited
+		//set all nodes pathfrom = null
+		
+		if(this.targetNode != null && this.selectedNode != null){
+			for(Map.Entry<Integer, Node> entry : this.nodes.entrySet()){
+				Node n = entry.getValue();
+				n.unVisit();
+			}
+			this.fringe = new Fringe();
+			
+			this.fringe.enqueue(this.selectedNode, null, 0, estimateFastest(this.selectedNode, this.targetNode));
+			
+			while(!this.fringe.isEmpty()){
+			
+				SearchNode sn = this.fringe.dequeue();
+		
+				Node currentNode = sn.getNode();
+				if(!currentNode.isVisited()){
+					currentNode.visit();
+					if(currentNode == this.targetNode){
+						
+						findRoute(sn);
+						
+						for(Road r : this.roadsRoute){
+							System.out.println(r.getName());
+						}
+						break;
+						//exit
+					}
+					
+					
+					for(Segment s : currentNode.getSegOut()){
+						Node neigh = null;
+						Road r = s.getRoad();
+						double speed = r.getSpeedLimit();
+						if(s.getNode1() == currentNode){
+							neigh = s.getNode2();
+						}
+						else{
+							neigh = s.getNode1();
+						}
+						
+						if(!neigh.isVisited()){
+							
+							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + (s.getLength()/speed), (s.getLength()/speed) + estimateFastest(this.targetNode, neigh));
+						}
+					}
+				}
+			}
+			
+		}
+		
+		this.getPath();
+		
 	}
+	
+	//used to display road names from start to goal
+	public void getPath(){
+		if(!this.roadsRoute.isEmpty()){
+			getTextOutputArea().setText("Route from start to finish: \n");
+			for(int i = this.roadsRoute.size() - 1; i >= 0; i--){
+				//first road
+				if(i == this.roadsRoute.size() - 1){
+					getTextOutputArea().append(this.roadsRoute.get(i).getName() + "\n");
+				}
+				else{
+					String roadName = this.roadsRoute.get(i).getName();
+					int roadId = this.roadsRoute.get(i).getId();
+					//if its not similar to the previous road
+					if(!roadName.equalsIgnoreCase(this.roadsRoute.get(i + 1).getName())){
+						getTextOutputArea().append(roadName + "\n");
+					}
+				}
+			}
+		}
+		
+		
+	}
+
+
+
+	//when button is pressed. find articulation points
+	@Override
+	protected void findAp() {
+		// TODO Auto-generated method stub
+		//display articulation points if toggle is true
+		this.artPtsToggle = !this.artPtsToggle;
+		
+		
+
+			// find articulation points
+			this.articulationPoints = ArticulationPointHelper.findArtPts(this.nodes.values());
+			
+		
+		redraw();
+		getTextOutputArea().setText("Articulation Points: " + this.articulationPoints.size());
+		System.out.println("Articulation Points: " + this.articulationPoints.size());
+		
+		
+	}
+	
+	
+	
+
+	
+	
 
 }

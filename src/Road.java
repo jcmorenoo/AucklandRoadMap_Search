@@ -81,4 +81,43 @@ public class Road {
 		return this.notForBicy;
 	}
 	
+	public double getSpeedLimit(){
+//		   0 = 5km/h    
+//				 1 = 20km/h   
+//				   2 = 40km/h   
+//				   3 = 60km/h   
+//				   4 = 80km/h   
+//				   5 = 100km/h  
+//				   6 = 110km/h  
+//				   7 = no limit
+		
+		if(this.speedLimit == 0){
+			return 5;
+		}
+		else if(this.speedLimit == 1){
+			return 20;
+		}
+		else if(this.speedLimit == 2){
+					return 40;
+				}
+		else if(this.speedLimit == 3){
+			return 60;
+		}
+		else if(this.speedLimit == 4){
+			return 80;
+		}
+		else if(this.speedLimit == 5){
+			return 100;
+		}
+		else if(this.speedLimit == 6){
+			return 110;
+		}
+		else{
+			return 110;
+		}
+		
+		
+	}
+	
+	
 }

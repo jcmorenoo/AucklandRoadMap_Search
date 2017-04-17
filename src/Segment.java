@@ -17,6 +17,7 @@ public class Segment {
 	private Node node2;
 	private Road road;
 	private boolean highlighted = false;
+	private boolean isRoute = false;;
 
 	private double weight;
 
@@ -38,7 +39,10 @@ public class Segment {
 	public void draw(Graphics g, Location origin, double scale){
 		g.setColor(Color.LIGHT_GRAY);
 		if(this.highlighted){
-			g.setColor(Color.MAGENTA);
+			g.setColor(Color.black);
+		}
+		if(this.isRoute){
+			g.setColor(Color.RED);
 		}
 		ArrayList<Point> points = new ArrayList<Point>();
 		for(Location loc : this.location){
@@ -62,6 +66,7 @@ public class Segment {
 
 	public void unHighlight(){
 		this.highlighted = false;
+		this.isRoute = false;
 	}
 
 	public ArrayList<Location> getLocation(){
@@ -83,6 +88,20 @@ public class Segment {
 	public void setWeight(double speed){
 		this.weight = this.length/speed;
 	}
+	
+	public double getLength(){
+		return this.length;
+	}
+	
+	public Road getRoad(){
+		return this.road;
+	}
+	
+	public void highlightRoute(){
+		this.isRoute = true;
+	}
+	
+	
 
 
 

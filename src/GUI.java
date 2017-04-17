@@ -51,6 +51,8 @@ public abstract class GUI {
 	};
 
 	protected abstract void onDrag(int x, int y);
+	
+	protected abstract void findAp();
 
 	protected abstract void onMouseWheelAction(MouseWheelEvent e);
 
@@ -255,6 +257,17 @@ public abstract class GUI {
 			}
 
 		});
+		
+		JButton findAp = new JButton("ArticulationPoint");
+		findAp.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				findAp();
+			}
+			
+		});
 
 		/*
 		 * first, we make the buttons etc. that go along the top bar.
@@ -424,11 +437,12 @@ public abstract class GUI {
 
 		//make panel for the new additions (startingnode,goalnode,fastestpath,shortestpath)
 		JPanel routeFinder = new JPanel();
-		routeFinder.setLayout(new GridLayout(2,2));
+		routeFinder.setLayout(new GridLayout(2,3));
 		routeFinder.add(starting);
 		routeFinder.add(goal);
 		routeFinder.add(shortestPath);
 		routeFinder.add(fastestPath);
+		routeFinder.add(findAp);
 
 
 

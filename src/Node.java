@@ -3,6 +3,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -17,6 +19,10 @@ public class Node {
 	private Set<Segment> segmentsIn = new HashSet<Segment>();
 	private Set<Segment> segmentsOut = new HashSet<Segment>();
 	private boolean isHighlighted = false;
+	private ArrayList<Node> children = new ArrayList<Node>();
+	private int count;
+	private int reachBack;
+	private boolean isAP = false;
 	
 	
 	
@@ -28,13 +34,23 @@ public class Node {
 		this.id = id;
 		this.location = loc;
 		this.visited = false;
+		this.children = new ArrayList<Node>();
+		this.count = Integer.MAX_VALUE;
 		
+	}
+	
+	
+	public ArrayList<Node> getChildren(){
+		return this.children;
 	}
 	
 	public void addSegmentIn(Segment segIn){
 		this.segmentsIn.add(segIn);
 	}
 	
+	public void setChildren(ArrayList<Node> children){
+		this.children = children;
+	}
 	public void addSegmentOut(Segment segOut){
 		this.segmentsOut.add(segOut);
 	}
@@ -65,6 +81,11 @@ public class Node {
 			Point p = this.location.asPoint(origin, scale);
 			g.fillOval((int)p.getX()-5, (int)p.getY()-5, 10, 10);
 		}
+		else if(this.isAP){
+			g.setColor(Color.orange);
+			Point p = this.location.asPoint(origin, scale);
+			g.fillOval((int)p.getX()-5, (int)p.getY()-5, 5, 5);
+		}
 		else{
 			g.setColor(Color.GRAY);
 			Point p = this.location.asPoint(origin, scale);
@@ -93,6 +114,58 @@ public class Node {
 	
 	public void unVisit(){
 		this.visited = false;
+	}
+	
+	public int getCount(){
+		return this.count;
+	}
+	
+	
+	
+	public void setCount(int count){
+		this.count = count;
+	}
+	
+	public void setReachBack(int count){
+		this.reachBack = count;
+	}
+	
+	public int getReachBack(){
+		return this.reachBack;
+	}
+	
+	public void setAp(){
+		this.isAP = true;
+	}
+	
+	public void removeAp(){
+		this.isAP = false;
+	}
+
+
+	
+	public Set<Node> getNeighbours(){
+		Set<Node> neighbours = new HashSet<Node>();
+		if(!this.segmentsIn.isEmpty()){
+			for(Segment seg : this.segmentsIn){
+				neighbours.add(seg.getNode1());
+			}
+		}
+		if(!this.segmentsOut.isEmpty()){
+			for(Segment seg : this.segmentsOut){
+				neighbours.add(seg.getNode2());
+				
+			}
+			
+		}
+		
+		
+		return neighbours;
+
+		
+	
+		
+	
 	}
 	
 	
