@@ -509,14 +509,14 @@ public class AucklandRoadMap extends GUI {
 						node1.addSegmentOut(seg);
 						node2.addSegmentIn(seg);
 						r.addSegment(seg);
-						if(!r.isOneWay()){
+						//if(!r.isOneWay()){
 							//create new segment
 							Segment seg2 = new Segment(r, length, node2, node1, location);
 							node1.addSegmentIn(seg2);
 							node2.addSegmentOut(seg2);
 							this.segments.add(seg);
 							r.addSegment(seg2);
-						}
+						//}
 
 					}
 
@@ -773,20 +773,13 @@ public class AucklandRoadMap extends GUI {
 						//exit
 					}
 					
-					
-					for(Segment s : currentNode.getSegOut()){
-						Node neigh = null;
-						if(s.getNode1() == currentNode){
-							neigh = s.getNode2();
-						}
-						else{
-							neigh = s.getNode1();
-						}
+					for(Node neigh : currentNode.getNeighbours()){
 						if(!neigh.isVisited()){
-							
-							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + s.getLength(), s.getLength() + estimate(this.targetNode, neigh));
+							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + estimate(currentNode,neigh), estimate(currentNode,neigh) + estimate(this.targetNode, neigh));
 						}
+						
 					}
+
 				}
 			}
 			
@@ -851,7 +844,7 @@ public class AucklandRoadMap extends GUI {
 		
 		double distance = locStart.distance(locTarget);
 		
-		return distance/100;
+		return distance/60;
 	}
 
 	
@@ -919,22 +912,35 @@ public class AucklandRoadMap extends GUI {
 	
 	//used to display road names from start to goal
 	public void getPath(){
+		double length = 0;
+		double totLength = 0;
+		double totTime = 0;
 		if(!this.roadsRoute.isEmpty()){
 			getTextOutputArea().setText("Route from start to finish: \n");
 			for(int i = this.roadsRoute.size() - 1; i >= 0; i--){
 				//first road
+				totTime = totTime + (this.segsRoute.get(i).getLength()/this.roadsRoute.get(i).getSpeedLimit());
+				
+				totLength = totLength + this.segsRoute.get(i).getLength();
 				if(i == this.roadsRoute.size() - 1){
-					getTextOutputArea().append(this.roadsRoute.get(i).getName() + "\n");
+					getTextOutputArea().append(this.roadsRoute.get(i).getName() + " : " + this.segsRoute.get(i).getLength() +"km \n");
 				}
 				else{
 					String roadName = this.roadsRoute.get(i).getName();
 					int roadId = this.roadsRoute.get(i).getId();
 					//if its not similar to the previous road
 					if(!roadName.equalsIgnoreCase(this.roadsRoute.get(i + 1).getName())){
-						getTextOutputArea().append(roadName + "\n");
+						length = this.segsRoute.get(i).getLength();
+						getTextOutputArea().append(roadName + " : " +length + "km \n");
+						length = 0;
+					}
+					else{
+						length = length + this.segsRoute.get(i).getLength();
 					}
 				}
 			}
+			getTextOutputArea().append("Total Length: " + totLength + "km \n");
+			getTextOutputArea().append("Total Time: " + totTime + "hours");
 		}
 		
 		
