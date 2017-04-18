@@ -632,6 +632,9 @@ public class AucklandRoadMap extends GUI {
 				e.printStackTrace();
 			}
 		}
+		
+		// find articulation points
+		this.articulationPoints = ArticulationPointHelper.findArtPts(this.nodes.values());
 
 		this.redraw();
 
@@ -773,12 +776,20 @@ public class AucklandRoadMap extends GUI {
 						//exit
 					}
 					
-					for(Node neigh : currentNode.getNeighbours()){
+					for(Segment s : currentNode.getSegOut()){
+						Node neigh = null;
+						Road r = s.getRoad();
+						double speed = r.getSpeedLimit();
+						double roadClass = (double) r.getRoadClass();
+//						
+						neigh = s.getNode2();
 						if(!neigh.isVisited()){
-							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + estimate(currentNode,neigh), estimate(currentNode,neigh) + estimate(this.targetNode, neigh));
+							
+							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + (s.getLength()), s.getLength() + estimate(this.targetNode, neigh));
 						}
-						
 					}
+					
+//					
 
 				}
 			}
@@ -890,18 +901,14 @@ public class AucklandRoadMap extends GUI {
 						Road r = s.getRoad();
 						double speed = r.getSpeedLimit();
 						double roadClass = (double) r.getRoadClass();
-						if(s.getNode1() == currentNode){
-							neigh = s.getNode2();
-						}
-						else{
-							neigh = s.getNode1();
-						}
-						
+//						
+						neigh = s.getNode2();
 						if(!neigh.isVisited()){
 							
 							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + ((s.getLength()/speed)/roadClass), ((s.getLength()/speed)/roadClass) + estimateFastest(this.targetNode, neigh));
 						}
 					}
+					
 				}
 			}
 			
@@ -957,8 +964,7 @@ public class AucklandRoadMap extends GUI {
 		
 		
 
-			// find articulation points
-			this.articulationPoints = ArticulationPointHelper.findArtPts(this.nodes.values());
+		
 			
 		
 		redraw();

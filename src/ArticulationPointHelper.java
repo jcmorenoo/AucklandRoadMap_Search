@@ -53,8 +53,7 @@ public class ArticulationPointHelper {
 		while(!stack.isEmpty()){
 			StackElement currentElem = stack.peek();
 			Node currentNode = currentElem.node;
-			
-			//if node.count == integer_max
+		
 			//first
 			if(currentNode.getCount() == Integer.MAX_VALUE){
 				currentNode.setCount(count);

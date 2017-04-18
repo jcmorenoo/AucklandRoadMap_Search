@@ -146,11 +146,13 @@ public class Node {
 	
 	public Set<Node> getNeighbours(){
 		Set<Node> neighbours = new HashSet<Node>();
+		//from nodes
 		if(!this.segmentsIn.isEmpty()){
 			for(Segment seg : this.segmentsIn){
 				neighbours.add(seg.getNode1());
 			}
 		}
+		//to nodes.
 		if(!this.segmentsOut.isEmpty()){
 			for(Segment seg : this.segmentsOut){
 				neighbours.add(seg.getNode2());
