@@ -844,7 +844,7 @@ public class AucklandRoadMap extends GUI {
 		
 		double distance = locStart.distance(locTarget);
 		
-		return distance/60;
+		return distance/110/5;
 	}
 
 	
@@ -889,6 +889,7 @@ public class AucklandRoadMap extends GUI {
 						Node neigh = null;
 						Road r = s.getRoad();
 						double speed = r.getSpeedLimit();
+						double roadClass = (double) r.getRoadClass();
 						if(s.getNode1() == currentNode){
 							neigh = s.getNode2();
 						}
@@ -898,7 +899,7 @@ public class AucklandRoadMap extends GUI {
 						
 						if(!neigh.isVisited()){
 							
-							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + (s.getLength()/speed), (s.getLength()/speed) + estimateFastest(this.targetNode, neigh));
+							this.fringe.enqueue(neigh, sn, sn.getCostFromStart() + ((s.getLength()/speed)/roadClass), ((s.getLength()/speed)/roadClass) + estimateFastest(this.targetNode, neigh));
 						}
 					}
 				}
@@ -920,7 +921,6 @@ public class AucklandRoadMap extends GUI {
 			for(int i = this.roadsRoute.size() - 1; i >= 0; i--){
 				//first road
 				totTime = totTime + (this.segsRoute.get(i).getLength()/this.roadsRoute.get(i).getSpeedLimit());
-				
 				totLength = totLength + this.segsRoute.get(i).getLength();
 				if(i == this.roadsRoute.size() - 1){
 					getTextOutputArea().append(this.roadsRoute.get(i).getName() + " : " + this.segsRoute.get(i).getLength() +"km \n");
@@ -939,8 +939,8 @@ public class AucklandRoadMap extends GUI {
 					}
 				}
 			}
-			getTextOutputArea().append("Total Length: " + totLength + "km \n");
-			getTextOutputArea().append("Total Time: " + totTime + "hours");
+			getTextOutputArea().append("Total Length: " + totLength + " km \n");
+			getTextOutputArea().append("Total Time: " + totTime + " hours");
 		}
 		
 		

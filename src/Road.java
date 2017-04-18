@@ -66,7 +66,15 @@ public class Road {
 	}
 	
 	public int getRoadClass(){
-		return this.roadClass;
+		
+//		 		  0 = Residential
+//				   1 = Collector
+//				   2 = Arterial 
+//				   3 = Principal HW
+//				   4 = Major HW 
+		
+		
+		return (this.roadClass + 1);
 	}
 	
 	public boolean isNotForCar(){
